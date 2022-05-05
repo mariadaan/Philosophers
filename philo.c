@@ -17,6 +17,14 @@
 // 	return NULL;
 // }
 
+long long	milli_to_micro(int milliseconds)
+{
+	long long	microseconds;
+	
+	microseconds = milliseconds * 1000;
+	return (microseconds);
+}
+
 int	error_msg(char *msg, int error_code)
 {
 	int	len;
@@ -43,12 +51,12 @@ void *routine(void *arguments){
 	int index = *((int *)arguments);
 	int sleep_time = ((int *)arguments)[1];
 	printf("THREAD %d: Started.\n", index);
-	printf("THREAD %d: Will be sleeping for %d seconds.\n", index, sleep_time);
+	printf("THREAD %d: Will be sleeping for %d milliseconds.\n", index, sleep_time);
 	// while !dead (timestamp < timetodie)
 		// eat
 		// sleep(time_to_eat);
 		// put forks back
-		sleep(sleep_time);
+		usleep(milli_to_micro(sleep_time));
 		// find fork
 			// loop until fork is found and !dead
 
@@ -94,6 +102,7 @@ int main(int argc, char *argv[])
 	int philo_index = 0;
 	while (philo_index < args.num_philo)
 	{
+		printf("philo_index: %d\n", philo_index);
 		thread_args[0] = philo_index;
 		printf("IN MAIN: Creating thread %d.\n", philo_index);
 		result_code = pthread_create(&threads[philo_index], NULL, routine, thread_args);
@@ -116,9 +125,10 @@ int main(int argc, char *argv[])
 	// pthread_create(&t1, NULL, routine, NULL);
 	// pthread_create(&t2, NULL, routine, NULL);
 
-	// // wait
-	// pthread_join(t1, NULL);
-	// pthread_join(t2, NULL);
+	// wait
+	pthread_join(threads[0], NULL);
+	pthread_join(threads[1], NULL);
+	pthread_join(threads[2], NULL);
 
 	// //frees the resources allocated for mutex
 	// pthread_mutex_destroy(&mutex);
