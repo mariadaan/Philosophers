@@ -5,12 +5,6 @@
 #include <stdbool.h>
 #include "philo.h"
 
-// int number_of_philosophers = 3;
-// int time_to_die = 200;
-// int time_to_eat = 100;
-// int time_to_sleep = 150;
-
-
 // void *routine()
 // {
 // 	pthread_mutex_lock(&mutex);
@@ -22,6 +16,15 @@
 // 	pthread_mutex_unlock(&mutex);
 // 	return NULL;
 // }
+
+int	error_msg(char *msg, int error_code)
+{
+	int	len;
+
+	len = ft_strlen(msg);
+	write(STDERR_FILENO, msg, len);
+	return (error_code);
+}
 
 void create_new_philo(t_philo *philo)
 {
@@ -58,7 +61,10 @@ void *routine(void *arguments){
 
 void get_args(t_args *args, char *argv[])
 {
-
+	args->num_philo = ft_atoi(argv[1]);
+	args->time_to_die = ft_atoi(argv[2]);
+	args->time_to_eat = ft_atoi(argv[3]);
+	args->time_to_sleep = ft_atoi(argv[4]);
 }
 
 int main(int argc, char *argv[])
@@ -66,13 +72,10 @@ int main(int argc, char *argv[])
 	t_args args;
 
 	if (check_input(argc, argv))
-		printf("expected usage: ./philo 200 100 150");
-	exit(0);
+		return (error_msg("expected usage: ./philo 3 200 100 150\n", 1));
 	get_args(&args, argv);
 	// create amount of philosophers threads
-	int number_of_philosophers = atoi(argv[1]);
-	printf("num: %d\n", number_of_philosophers);
-	pthread_t threads[number_of_philosophers];
+	pthread_t threads[args.num_philo];
 
 	// save
 	int time_to_die =  atoi(argv[2]);
@@ -89,7 +92,7 @@ int main(int argc, char *argv[])
 	int result_code;
 
 	int philo_index = 0;
-	while (philo_index < number_of_philosophers)
+	while (philo_index < args.num_philo)
 	{
 		thread_args[0] = philo_index;
 		printf("IN MAIN: Creating thread %d.\n", philo_index);
