@@ -1,7 +1,10 @@
 NAME =			philo
 VPATH =			./src/ ./obj/
 SRCS = 			philo.c \
-				check_input.c
+				check_input.c \
+				ft_atoi.c \
+				ft_itoa.c \
+				ft_strcmp.c
 
 OBJS			= $(SRCS:.c=.o)
 OBJ_DIR			= ./obj/

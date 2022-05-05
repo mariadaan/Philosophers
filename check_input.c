@@ -1,21 +1,24 @@
 #include "philo.h"
 #include <stdlib.h>
 
+char	*ft_itoa(int n);
+int		ft_strcmp(const char *s1, const char *s2);
+
 /*
 	Check whether string contains an integer value
 	Returns 1 if num is within integer value boundaries
 	else, returns 0
 */
-int	is_int(char *num_str)
+static int	is_int(char *num_str)
 {
 	int		num_int;
 	char	*new_num_str;
 
 	if (!num_str)
 		return (0);
-	num_int = atoi(num_str);
-	new_num_str = itoa(num_int);
-	if (strcmp(num_str, new_num_str))
+	num_int = ft_atoi(num_str);
+	new_num_str = ft_itoa(num_int);
+	if (ft_strcmp(num_str, new_num_str))
 	{
 		free(new_num_str);
 		return (0);
@@ -30,13 +33,11 @@ int	is_int(char *num_str)
 	- 1 if all ints
 	- 0 if not all ints
 */
-int	is_all_ints(int argc, char **input)
+static int	is_all_ints(int argc, char **input)
 {
 	int		i;
 	char	*num;
 
-	if (argc < 2)
-		return (1);
 	i = 0;
 	while (i < argc - 1)
 	{
@@ -56,6 +57,8 @@ int	is_all_ints(int argc, char **input)
 */
 int	check_input(int argc, char **input)
 {
+	if (argc < 5)
+		return (1);
 	if (is_all_ints(argc, input + 1) == 0)
 		return (1);
 	return (0);
