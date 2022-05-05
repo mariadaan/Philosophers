@@ -1,16 +1,15 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        ::::::::            */
-/*   ft_strncmp.c                                       :+:    :+:            */
+/*   ft_strcmp.c                                        :+:    :+:            */
 /*                                                     +:+                    */
 /*   By: mdaan <mdaan@student.codam.nl>               +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2020/11/02 13:01:35 by mdaan         #+#    #+#                 */
-/*   Updated: 2021/03/18 19:32:33 by mdaan         ########   odam.nl         */
+/*   Updated: 2022/05/05 16:45:37 by mdaan         ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "libft.h"
 
 /*
 **	Description:
@@ -24,17 +23,15 @@
 **	(s1[char] - s2[char] on the first char that is different)
 */
 
-int	ft_strncmp(const char *s1, const char *s2, size_t n)
+int	ft_strcmp(const char *s1, const char *s2)
 {
-	size_t	i;
+	unsigned int	i;
 
 	i = 0;
-	while ((s1[i] || s2[i]) && i < n)
+	while ((s1[i] || s2[i]))
 	{
-		if (s1[i] != s2[i])
-		{
+		if ((unsigned char)s1[i] - (unsigned char)s2[i] != 0)
 			return ((unsigned char)s1[i] - (unsigned char)s2[i]);
-		}
 		i++;
 	}
 	return (0);

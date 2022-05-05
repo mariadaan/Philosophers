@@ -6,19 +6,9 @@
 /*   By: mdaan <mdaan@student.codam.nl>               +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2020/10/27 19:45:45 by mdaan         #+#    #+#                 */
-/*   Updated: 2022/02/25 15:15:26 by nduijf        ########   odam.nl         */
+/*   Updated: 2022/05/05 16:45:23 by mdaan         ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
-
-#include "libft.h"
-
-/*
-**	Description:
-**	The atoi() function converts the number in str to int representation.
-**
-**	Returns:
-**	int value
-*/
 
 int	ft_isspace(int c)
 {
@@ -28,6 +18,21 @@ int	ft_isspace(int c)
 		return (0);
 }
 
+int	ft_isdigit(int c)
+{
+	if (c >= '0' && c <= '9')
+		return (1);
+	else
+		return (0);
+}
+
+/*
+**	Description:
+**	The atoi() function converts the number in str to int representation.
+**
+**	Returns:
+**	int value
+*/
 int	ft_atoi(const char *str)
 {
 	unsigned long int	res;
