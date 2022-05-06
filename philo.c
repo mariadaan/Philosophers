@@ -43,13 +43,18 @@ void create_new_philo(t_philo *philo)
 	philo->dead = false;
 }
 
-void *routine(void *arguments){
+void *routine(void *arg){
 	// philosopher comes to life
-	t_philo philo;
+	t_philo *philo;
+	
+	philo = arg;
+	int index = philo->philo_index;
+	int sleep_time = philo->specs.time_to_sleep;
 
-	create_new_philo(&philo);
-	int index = *((int *)arguments);
-	int sleep_time = ((int *)arguments)[1];
+
+	printf("\nindex: %d\n", index);
+	printf("sleeptime: %d\n", sleep_time);
+
 	printf("THREAD %d: Started.\n", index);
 	printf("THREAD %d: Will be sleeping for %d milliseconds.\n", index, sleep_time);
 	// while !dead (timestamp < timetodie)
@@ -62,17 +67,29 @@ void *routine(void *arguments){
 
 
 	// philosopher dies
-	printf("THREAD %d: Ended.\n", index);
+	printf("THREAD %d: Ended.\n\n", index);
 	return NULL;
 }
 
 
 void get_args(t_args *args, char *argv[])
 {
-	args->num_philo = ft_atoi(argv[1]);
+	args->num_philos = ft_atoi(argv[1]);
 	args->time_to_die = ft_atoi(argv[2]);
 	args->time_to_eat = ft_atoi(argv[3]);
 	args->time_to_sleep = ft_atoi(argv[4]);
+}
+
+void get_philo_specs(t_philo *philos, t_args args)
+{
+	int philo_index = 0;
+	while (philo_index < args.num_philos)
+	{
+		philos[philo_index].philo_index = philo_index;
+		philos[philo_index].specs = args;
+		philo_index++;
+	}
+
 }
 
 int main(int argc, char *argv[])
@@ -82,30 +99,34 @@ int main(int argc, char *argv[])
 	if (check_input(argc, argv))
 		return (error_msg("expected usage: ./philo 3 200 100 150\n", 1));
 	get_args(&args, argv);
+
 	// create amount of philosophers threads
-	pthread_t threads[args.num_philo];
+	pthread_t threads[args.num_philos];
 
-	// save
-	int time_to_die =  atoi(argv[2]);
-	int time_to_eat =  atoi(argv[3]);
-	int time_to_sleep =  atoi(argv[4]);
+	// create philosophers with specs
+	t_philo philos[args.num_philos];
+	get_philo_specs(philos, args);
 
-	int *thread_args = malloc(5 * sizeof(int));
-	// thread_args[0] = number_of_philosophers;
-	thread_args[1] = time_to_die;
-	thread_args[2] = time_to_eat;
-	thread_args[3] = time_to_sleep;
-	thread_args[4] = 0;
+	// int *thread_args = malloc(5 * sizeof(int));
+	// // thread_args[0] = args.num_philo;
+	// thread_args[1] = args.time_to_die;
+	// thread_args[2] = args.time_to_eat;
+	// thread_args[3] = args.time_to_sleep;
+	// thread_args[4] = 0;
+
+	// printf("die time : %d\n", thread_args[1]);
+	// printf("eat time : %d\n", thread_args[2]);
+	// printf("sleeptime: %d\n", thread_args[3]);
 
 	int result_code;
 
 	int philo_index = 0;
-	while (philo_index < args.num_philo)
+	while (philo_index < args.num_philos)
 	{
-		printf("philo_index: %d\n", philo_index);
-		thread_args[0] = philo_index;
+		printf("\nphilo_index: %d\n", philo_index);
+
 		printf("IN MAIN: Creating thread %d.\n", philo_index);
-		result_code = pthread_create(&threads[philo_index], NULL, routine, thread_args);
+		result_code = pthread_create(&threads[philo_index], NULL, routine, &(philos[philo_index]));
 		if (result_code)
 		{
 			printf("exit\n");
