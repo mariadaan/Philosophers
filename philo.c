@@ -62,10 +62,10 @@ void get_args(t_args *args, char *argv[])
 	args->time_to_sleep = ft_atoi(argv[4]);
 }
 
-void init_philo(t_philo *philos, t_args args)
+void init_philo(t_philo *philos, t_args *args)
 {
 	int philo_index = 0;
-	while (philo_index < args.num_philos)
+	while (philo_index < (*args).num_philos)
 	{
 		philos[philo_index].philo_index = philo_index;
 		philos[philo_index].l_fork = 0;
@@ -73,7 +73,7 @@ void init_philo(t_philo *philos, t_args args)
 		philos[philo_index].eating = 0;
 		philos[philo_index].sleeping = 0;
 		philos[philo_index].dead = 0;
-		philos[philo_index].specs = args;
+		philos[philo_index].specs = *args;
 		philo_index++;
 	}
 }
@@ -93,7 +93,7 @@ int main(int argc, char *argv[])
 
 	// create philosophers with specs
 	t_philo philos[args.num_philos];
-	init_philo(philos, args);
+	init_philo(philos, &args);
 
 	// create threads and start simulation
 	philo_index = 0;
