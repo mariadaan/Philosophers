@@ -5,17 +5,6 @@
 #include <stdbool.h>
 #include "philo.h"
 
-// void *routine()
-// {
-// 	pthread_mutex_lock(&mutex);
-// 	for (int i = 0; i < 1000000; i++){
-// 		global++;
-		
-// 	}
-// 	printf("%d ", global);
-// 	pthread_mutex_unlock(&mutex);
-// 	return NULL;
-// }
 
 long long	milli_to_micro(int milliseconds)
 {
@@ -48,26 +37,19 @@ void *routine(void *arg){
 	t_philo *philo;
 	
 	philo = arg;
-	int index = philo->philo_index;
-	int sleep_time = philo->specs.time_to_sleep;
-
-
-	printf("\nindex: %d\n", index);
-	printf("sleeptime: %d\n", sleep_time);
-
-	printf("THREAD %d: Started.\n", index);
-	printf("THREAD %d: Will be sleeping for %d milliseconds.\n", index, sleep_time);
+	printf("\nTHREAD %d: Started.\n", philo->philo_index);
+	printf("THREAD %d: Will be sleeping for %d milliseconds.\n", philo->philo_index, philo->specs.time_to_sleep);
 	// while !dead (timestamp < timetodie)
 		// eat
 		// sleep(time_to_eat);
 		// put forks back
-		usleep(milli_to_micro(sleep_time));
+		usleep(milli_to_micro(philo->specs.time_to_sleep));
 		// find fork
 			// loop until fork is found and !dead
 
 
 	// philosopher dies
-	printf("THREAD %d: Ended.\n\n", index);
+	printf("THREAD %d: Ended.\n\n", philo->philo_index);
 	return NULL;
 }
 
@@ -80,21 +62,27 @@ void get_args(t_args *args, char *argv[])
 	args->time_to_sleep = ft_atoi(argv[4]);
 }
 
-void get_philo_specs(t_philo *philos, t_args args)
+void init_philo(t_philo *philos, t_args args)
 {
 	int philo_index = 0;
 	while (philo_index < args.num_philos)
 	{
 		philos[philo_index].philo_index = philo_index;
+		philos[philo_index].l_fork = 0;
+		philos[philo_index].r_fork = 0;
+		philos[philo_index].eating = 0;
+		philos[philo_index].sleeping = 0;
+		philos[philo_index].dead = 0;
 		philos[philo_index].specs = args;
 		philo_index++;
 	}
-
 }
 
 int main(int argc, char *argv[])
 {
-	t_args args;
+	t_args	args;
+	int	result_code;
+	int philo_index;
 
 	if (check_input(argc, argv))
 		return (error_msg("expected usage: ./philo 3 200 100 150\n", 1));
@@ -105,51 +93,32 @@ int main(int argc, char *argv[])
 
 	// create philosophers with specs
 	t_philo philos[args.num_philos];
-	get_philo_specs(philos, args);
+	init_philo(philos, args);
 
-	// int *thread_args = malloc(5 * sizeof(int));
-	// // thread_args[0] = args.num_philo;
-	// thread_args[1] = args.time_to_die;
-	// thread_args[2] = args.time_to_eat;
-	// thread_args[3] = args.time_to_sleep;
-	// thread_args[4] = 0;
-
-	// printf("die time : %d\n", thread_args[1]);
-	// printf("eat time : %d\n", thread_args[2]);
-	// printf("sleeptime: %d\n", thread_args[3]);
-
-	int result_code;
-
-	int philo_index = 0;
+	// create threads and start simulation
+	philo_index = 0;
 	while (philo_index < args.num_philos)
 	{
-		printf("\nphilo_index: %d\n", philo_index);
-
 		printf("IN MAIN: Creating thread %d.\n", philo_index);
 		result_code = pthread_create(&threads[philo_index], NULL, routine, &(philos[philo_index]));
 		if (result_code)
-		{
-			printf("exit\n");
-			exit(0);
-		}
+			return(error_msg("error creating thread\n", 1));
 		philo_index++;
 	}
 
 	printf("IN MAIN: All threads are created.\n");
 
-
+	// wait for all threads to finish
+	philo_index = 0;
+	while (philo_index < args.num_philos)
+	{
+		pthread_join(threads[philo_index], NULL);
+		philo_index++;
+	}
 
 	// // The pthread_mutex_init() function creates a new mutex
 	// pthread_mutex_init(&mutex, NULL);
 
-	// // create threads
-	// pthread_create(&t1, NULL, routine, NULL);
-	// pthread_create(&t2, NULL, routine, NULL);
-
-	// wait
-	pthread_join(threads[0], NULL);
-	pthread_join(threads[1], NULL);
-	pthread_join(threads[2], NULL);
 
 	// //frees the resources allocated for mutex
 	// pthread_mutex_destroy(&mutex);
