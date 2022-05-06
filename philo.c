@@ -125,3 +125,12 @@ int main(int argc, char *argv[])
 
 	return (0);
 }
+
+/* 
+TO DO: 
+
+mutexes maken voor de forks
+zorgen dat iedereen die forks kan zien
+beginnen met simulatie
+
+ */
