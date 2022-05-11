@@ -35,10 +35,14 @@ void create_new_philo(t_philo *philo)
 void *routine(void *arg){
 	// philosopher comes to life
 	t_philo *philo;
+
+	// gettimeofday(); // hoe deze gebruiken??
 	
 	philo = arg;
 	printf("\nTHREAD %d: Started.\n", philo->philo_index);
 	printf("THREAD %d: Will be sleeping for %d milliseconds.\n", philo->philo_index, philo->specs.time_to_sleep);
+	
+	pthread_mutex_lock(&philo->specs.forks[philo->philo_index]);
 	// while !dead (timestamp < timetodie)
 		// eat
 		// sleep(time_to_eat);
@@ -78,15 +82,44 @@ void init_philo(t_philo *philos, t_args *args)
 	}
 }
 
+pthread_mutex_t	*create_forks(int num)
+{
+	pthread_mutex_t	*forks;
+	int	i;
+
+	forks = malloc(num * sizeof(pthread_mutex_t));
+	i = 0;
+	while (i < num)
+	{
+		pthread_mutex_init(&(forks[i]), NULL);
+		i++;
+	}
+	return (forks);
+}
+
+void	destroy_forks(pthread_mutex_t *forks, int num)
+{
+	int	i;
+
+	i = 0;
+	while (i < num)
+	{
+		pthread_mutex_destroy(&forks[i]);
+		i++;
+	}
+}
+
 int main(int argc, char *argv[])
 {
 	t_args	args;
 	int	result_code;
-	int philo_index;
+	int	philo_index;
 
 	if (check_input(argc, argv))
 		return (error_msg("expected usage: ./philo 3 200 100 150\n", 1));
 	get_args(&args, argv);
+
+	args.forks = create_forks(args.num_philos);
 
 	// create amount of philosophers threads
 	pthread_t threads[args.num_philos];
@@ -108,6 +141,8 @@ int main(int argc, char *argv[])
 
 	printf("IN MAIN: All threads are created.\n");
 
+
+
 	// wait for all threads to finish
 	philo_index = 0;
 	while (philo_index < args.num_philos)
@@ -115,6 +150,8 @@ int main(int argc, char *argv[])
 		pthread_join(threads[philo_index], NULL);
 		philo_index++;
 	}
+
+	destroy_forks(args.forks, args.num_philos);
 
 	// // The pthread_mutex_init() function creates a new mutex
 	// pthread_mutex_init(&mutex, NULL);
@@ -132,5 +169,7 @@ TO DO:
 mutexes maken voor de forks
 zorgen dat iedereen die forks kan zien
 beginnen met simulatie
+
+gettimeofday functie
 
  */
