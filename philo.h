@@ -2,6 +2,7 @@
 # define PHILO_H
 
 #include <stdbool.h>
+#include <sys/time.h>
 
 #define AVAILABLE 1
 #define TAKEN 0
@@ -12,7 +13,8 @@ typedef struct s_args
 	int		time_to_die;
 	int		time_to_eat;
 	int		time_to_sleep;
-	// bool	*forks;
+	bool	someone_dead;
+	pthread_mutex_t	*forks;
 }		t_args;
 
 typedef struct s_philo
