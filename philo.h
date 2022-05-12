@@ -13,19 +13,22 @@ typedef struct s_args
 	int		time_to_die;
 	int		time_to_eat;
 	int		time_to_sleep;
-	bool	someone_dead;
+	int		num_meals;
+	int		num_done_eating;
+	bool	stop_simulation;
 	pthread_mutex_t	*forks;
 }		t_args;
 
 typedef struct s_philo
 {
 	int		philo_index;
+	int		eaten_meals;
 	bool	l_fork;
 	bool	r_fork;
 	bool	eating;
 	bool	sleeping;
 	bool	dead;
-	t_args	specs;
+	t_args	*specs;
 }		t_philo;
 
 
