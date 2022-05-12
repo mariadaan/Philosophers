@@ -40,30 +40,40 @@ int	left_fork_index(t_philo philo)
 		index = philo.specs->num_philos - 1;
 	else
 		index = philo.philo_index - 1;
-	// printf("philo num: %d\n", philo.philo_index);
-	// printf("left fork: %d\n", index);
 	return (index);
 }
 
 void	eat_philo(t_philo *philo)
 {
-	// eat
-	pthread_mutex_lock(&philo->specs->forks[left_fork_index(*philo)]); // left fork
-	pthread_mutex_lock(&philo->specs->forks[philo->philo_index]); // right fork
-	philo->eaten_meals++;
-	printf("THREAD %d: Will be eating %dst meal for %d milliseconds.\n", philo->philo_index, philo->eaten_meals, philo->specs->time_to_eat);
-	usleep(milli_to_micro(philo->specs->time_to_eat));
-	pthread_mutex_unlock(&philo->specs->forks[left_fork_index(*philo)]); // left fork
-	pthread_mutex_unlock(&philo->specs->forks[philo->philo_index]); // right fork
-	if (philo->eaten_meals >= philo->specs->num_meals)
+	if (philo->eaten_meals == philo->specs->num_meals)
 	{
 		philo->specs->num_done_eating++;
 		if (philo->specs->num_done_eating == philo->specs->num_philos)
 		{
 			philo->specs->stop_simulation = true;
-			printf("All philosophers have had enough meals!\n");
+			printf("All philosophers have had enough meals.\n");
+			return ;
 		}
 	}
+	// eat
+	pthread_mutex_lock(&philo->specs->forks[left_fork_index(*philo)]); // left fork
+	pthread_mutex_lock(&philo->specs->forks[philo->philo_index]); // right fork
+	if (philo->eaten_meals >= philo->specs->num_meals)
+	{
+		if (philo->specs->num_done_eating >= philo->specs->num_philos)
+		{
+			philo->specs->stop_simulation = true;
+			printf("All philosophers have had enough meals.\n");
+			pthread_mutex_unlock(&philo->specs->forks[left_fork_index(*philo)]); // left fork
+			pthread_mutex_unlock(&philo->specs->forks[philo->philo_index]); // right fork
+			return ;
+		}
+	}
+	philo->eaten_meals++;
+	printf("THREAD %d: Will be eating %dst meal for %d milliseconds.\n", philo->philo_index, philo->eaten_meals, philo->specs->time_to_eat);
+	usleep(milli_to_micro(philo->specs->time_to_eat));
+	pthread_mutex_unlock(&philo->specs->forks[left_fork_index(*philo)]); // left fork
+	pthread_mutex_unlock(&philo->specs->forks[philo->philo_index]); // right fork
 }
 
 void	sleep_philo(t_philo *philo)
@@ -88,15 +98,6 @@ void *routine(void *arg){
 			sleep_philo(philo);
 		// think_philo(philo);
 	}
-
-	//  while (!someone_dead && timestamp < timetodie)
-		// eat
-		// sleep(time_to_eat);
-		// put forks back
-
-		// find fork
-			// loop until fork is found and !dead
-
 
 	// philosopher dies
 	printf("THREAD %d: Ended.\n\n", philo->philo_index);
@@ -191,8 +192,6 @@ int main(int argc, char *argv[])
 
 	printf("IN MAIN: All threads are created.\n");
 
-
-
 	// wait for all threads to finish
 	philo_index = 0;
 	while (philo_index < args.num_philos)
@@ -202,14 +201,6 @@ int main(int argc, char *argv[])
 	}
 
 	destroy_forks(args.forks, args.num_philos);
-
-	// // The pthread_mutex_init() function creates a new mutex
-	// pthread_mutex_init(&mutex, NULL);
-
-
-	// //frees the resources allocated for mutex
-	// pthread_mutex_destroy(&mutex);
-
 	return (0);
 }
 
