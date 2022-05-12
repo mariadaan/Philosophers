@@ -28,7 +28,7 @@ fclean:	clean
 	rm -rf $(OBJ_DIR)
 
 debug:	all
-	./philo 3 200 100 150
+	./philo 3 200 400 150 3
 
 re:	fclean $(NAME)
 
