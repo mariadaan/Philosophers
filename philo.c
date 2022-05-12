@@ -32,6 +32,46 @@ void create_new_philo(t_philo *philo)
 	philo->dead = false;
 }
 
+int	left_fork_index(t_philo philo)
+{
+	int	index;
+
+	if (philo.philo_index == 0)
+		index = philo.specs->num_philos - 1;
+	else
+		index = philo.philo_index - 1;
+	// printf("philo num: %d\n", philo.philo_index);
+	// printf("left fork: %d\n", index);
+	return (index);
+}
+
+void	eat_philo(t_philo *philo)
+{
+	// eat
+	pthread_mutex_lock(&philo->specs->forks[left_fork_index(*philo)]); // left fork
+	pthread_mutex_lock(&philo->specs->forks[philo->philo_index]); // right fork
+	philo->eaten_meals++;
+	printf("THREAD %d: Will be eating %dst meal for %d milliseconds.\n", philo->philo_index, philo->eaten_meals, philo->specs->time_to_eat);
+	usleep(milli_to_micro(philo->specs->time_to_eat));
+	pthread_mutex_unlock(&philo->specs->forks[left_fork_index(*philo)]); // left fork
+	pthread_mutex_unlock(&philo->specs->forks[philo->philo_index]); // right fork
+	if (philo->eaten_meals >= philo->specs->num_meals)
+	{
+		philo->specs->num_done_eating++;
+		if (philo->specs->num_done_eating == philo->specs->num_philos)
+		{
+			philo->specs->stop_simulation = true;
+			printf("All philosophers have had enough meals!\n");
+		}
+	}
+}
+
+void	sleep_philo(t_philo *philo)
+{
+	printf("THREAD %d: Will be sleeping for %d milliseconds.\n", philo->philo_index, philo->specs->time_to_sleep);
+	usleep(milli_to_micro(philo->specs->time_to_sleep));
+}
+
 void *routine(void *arg){
 	// philosopher comes to life
 	t_philo *philo;
@@ -40,14 +80,20 @@ void *routine(void *arg){
 	
 	philo = arg;
 	printf("\nTHREAD %d: Started.\n", philo->philo_index);
-	printf("THREAD %d: Will be sleeping for %d milliseconds.\n", philo->philo_index, philo->specs.time_to_sleep);
-	
-	pthread_mutex_lock(&philo->specs.forks[philo->philo_index]);
-	// while !dead (timestamp < timetodie)
+
+	while (!philo->specs->stop_simulation)
+	{
+		eat_philo(philo);
+		if (!philo->specs->stop_simulation)
+			sleep_philo(philo);
+		// think_philo(philo);
+	}
+
+	//  while (!someone_dead && timestamp < timetodie)
 		// eat
 		// sleep(time_to_eat);
 		// put forks back
-		usleep(milli_to_micro(philo->specs.time_to_sleep));
+
 		// find fork
 			// loop until fork is found and !dead
 
@@ -64,6 +110,9 @@ void get_args(t_args *args, char *argv[])
 	args->time_to_die = ft_atoi(argv[2]);
 	args->time_to_eat = ft_atoi(argv[3]);
 	args->time_to_sleep = ft_atoi(argv[4]);
+	args->num_meals = ft_atoi(argv[5]);
+	args->num_done_eating = 0;
+	args->stop_simulation = false;
 }
 
 void init_philo(t_philo *philos, t_args *args)
@@ -72,12 +121,13 @@ void init_philo(t_philo *philos, t_args *args)
 	while (philo_index < (*args).num_philos)
 	{
 		philos[philo_index].philo_index = philo_index;
+		philos[philo_index].eaten_meals = 0;
 		philos[philo_index].l_fork = 0;
 		philos[philo_index].r_fork = 0;
 		philos[philo_index].eating = 0;
 		philos[philo_index].sleeping = 0;
 		philos[philo_index].dead = 0;
-		philos[philo_index].specs = *args;
+		philos[philo_index].specs = args;
 		philo_index++;
 	}
 }
