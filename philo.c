@@ -54,18 +54,13 @@ void	protected_change_bool(pthread_mutex_t *mutex, bool *old_val, bool new_val)
 
 int	eat_philo(t_philo *philo)
 {
+	pthread_mutex_lock(&(philo->specs->eating_mutex));
 	if (philo->eaten_meals == philo->specs->num_meals)
 	{
-		protected_change_int(&(philo->specs->num_done_mutex), &(philo->specs->num_done_eating), philo->specs->num_done_eating + 1);
-		// pthread_mutex_lock(&protect_var);
-		// philo->specs->num_done_eating++;
-		// pthread_mutex_unlock(&protect_var);
+		philo->specs->num_done_eating++;
 		if (philo->specs->num_done_eating == philo->specs->num_philos)
 		{
-			protected_change_bool(&(philo->specs->stop_mutex), &(philo->specs->stop_simulation), true);
-			// pthread_mutex_lock(&protect_var);
-			// philo->specs->stop_simulation = true;
-			// pthread_mutex_unlock(&protect_var);
+			philo->specs->stop_simulation = true;
 			printf("All philosophers have had enough meals.\n");
 			return (1);
 		}
@@ -73,6 +68,7 @@ int	eat_philo(t_philo *philo)
 	// eat
 	pthread_mutex_lock(&philo->specs->forks[left_fork_index(*philo)]); // left fork
 	pthread_mutex_lock(&philo->specs->forks[philo->philo_index]); // right fork
+
 	if (philo->eaten_meals >= philo->specs->num_meals)
 	{
 		if (philo->specs->num_done_eating >= philo->specs->num_philos)
@@ -86,6 +82,8 @@ int	eat_philo(t_philo *philo)
 	}
 	philo->eaten_meals++;
 	printf("THREAD %d: Will be eating %dst meal for %d milliseconds.\n", philo->philo_index, philo->eaten_meals, philo->specs->time_to_eat);
+	pthread_mutex_unlock(&(philo->specs->eating_mutex));
+	
 	usleep(milli_to_micro(philo->specs->time_to_eat));
 	pthread_mutex_unlock(&philo->specs->forks[left_fork_index(*philo)]); // left fork
 	pthread_mutex_unlock(&philo->specs->forks[philo->philo_index]); // right fork
