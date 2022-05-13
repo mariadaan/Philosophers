@@ -1,8 +1,3 @@
-#include <stdlib.h>
-#include <stdio.h>
-#include <unistd.h>
-#include <pthread.h>
-#include <stdbool.h>
 #include "philo.h"
 
 
@@ -43,16 +38,36 @@ int	left_fork_index(t_philo philo)
 	return (index);
 }
 
-void	eat_philo(t_philo *philo)
+void	protected_change_int(pthread_mutex_t *mutex, int *old_val, int new_val)
+{
+	pthread_mutex_lock(mutex);
+	*old_val = new_val;
+	pthread_mutex_unlock(mutex);
+}
+
+void	protected_change_bool(pthread_mutex_t *mutex, bool *old_val, bool new_val)
+{
+	pthread_mutex_lock(mutex);
+	*old_val = new_val;
+	pthread_mutex_unlock(mutex);
+}
+
+int	eat_philo(t_philo *philo)
 {
 	if (philo->eaten_meals == philo->specs->num_meals)
 	{
-		philo->specs->num_done_eating++;
+		protected_change_int(&(philo->specs->num_done_mutex), &(philo->specs->num_done_eating), philo->specs->num_done_eating + 1);
+		// pthread_mutex_lock(&protect_var);
+		// philo->specs->num_done_eating++;
+		// pthread_mutex_unlock(&protect_var);
 		if (philo->specs->num_done_eating == philo->specs->num_philos)
 		{
-			philo->specs->stop_simulation = true;
+			protected_change_bool(&(philo->specs->stop_mutex), &(philo->specs->stop_simulation), true);
+			// pthread_mutex_lock(&protect_var);
+			// philo->specs->stop_simulation = true;
+			// pthread_mutex_unlock(&protect_var);
 			printf("All philosophers have had enough meals.\n");
-			return ;
+			return (1);
 		}
 	}
 	// eat
@@ -66,7 +81,7 @@ void	eat_philo(t_philo *philo)
 			printf("All philosophers have had enough meals.\n");
 			pthread_mutex_unlock(&philo->specs->forks[left_fork_index(*philo)]); // left fork
 			pthread_mutex_unlock(&philo->specs->forks[philo->philo_index]); // right fork
-			return ;
+			return (1);
 		}
 	}
 	philo->eaten_meals++;
@@ -74,12 +89,14 @@ void	eat_philo(t_philo *philo)
 	usleep(milli_to_micro(philo->specs->time_to_eat));
 	pthread_mutex_unlock(&philo->specs->forks[left_fork_index(*philo)]); // left fork
 	pthread_mutex_unlock(&philo->specs->forks[philo->philo_index]); // right fork
+	return (0);
 }
 
-void	sleep_philo(t_philo *philo)
+int	sleep_philo(t_philo *philo)
 {
 	printf("THREAD %d: Will be sleeping for %d milliseconds.\n", philo->philo_index, philo->specs->time_to_sleep);
 	usleep(milli_to_micro(philo->specs->time_to_sleep));
+	return (0);
 }
 
 void *routine(void *arg){
@@ -114,6 +131,9 @@ void get_args(t_args *args, char *argv[])
 	args->num_meals = ft_atoi(argv[5]);
 	args->num_done_eating = 0;
 	args->stop_simulation = false;
+	pthread_mutex_init(&(args->stop_mutex), NULL);
+	pthread_mutex_init(&(args->num_done_mutex), NULL);
+
 }
 
 void init_philo(t_philo *philos, t_args *args)
@@ -210,6 +230,8 @@ TO DO:
 mutexes maken voor de forks
 zorgen dat iedereen die forks kan zien
 beginnen met simulatie
+
+data race bij stop_simulation var oplossen
 
 gettimeofday functie
 
