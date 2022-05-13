@@ -13,7 +13,7 @@ CFLAGS			= -Wall -Wextra -I${INCL_DIR}
 CC				= gcc
 
 ifdef WITH_SANITIZER
-CFLAGS			= -fsanitize=thread -Wall -Wextra -I${INCL_DIR}
+CFLAGS			= -fsanitize=thread -g -Wall -Wextra -I${INCL_DIR}
 else
 CFLAGS			= -Wall -Wextra -I${INCL_DIR}
 endif
