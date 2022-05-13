@@ -12,6 +12,12 @@ INCL_DIR		= ./includes/
 CFLAGS			= -Wall -Wextra -I${INCL_DIR}
 CC				= gcc
 
+ifdef WITH_SANITIZER
+CFLAGS			= -fsanitize=thread -Wall -Wextra -I${INCL_DIR}
+else
+CFLAGS			= -Wall -Wextra -I${INCL_DIR}
+endif
+
 all:	$(NAME)
 
 $(NAME): $(OBJS)
@@ -20,14 +26,16 @@ $(NAME): $(OBJS)
 	${CC} ${CFLAGS} -o ${NAME} $(addprefix $(OBJ_DIR), $(OBJS))
 
 clean:
-	make clean -C libft
 	rm -f $(addprefix $(OBJ_DIR), $(OBJS))
 
 fclean:	clean
-	rm -f $(NAME) $(LIBFT)
 	rm -rf $(OBJ_DIR)
 
 debug:	all
+	./philo 3 200 400 150 3
+
+sanitize:	all
+	$(MAKE) WITH_SANITIZER=1 re
 	./philo 3 200 400 150 3
 
 re:	fclean $(NAME)
