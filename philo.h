@@ -21,6 +21,7 @@ typedef struct s_args
 	int		num_done_eating;
 	bool	stop_simulation;
 	pthread_mutex_t	*forks;
+	pthread_mutex_t	eating_mutex;
 	pthread_mutex_t	stop_mutex;
 	pthread_mutex_t	num_done_mutex;
 	
