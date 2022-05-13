@@ -3,6 +3,10 @@
 
 #include <stdbool.h>
 #include <sys/time.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <unistd.h>
+#include <pthread.h>
 
 #define AVAILABLE 1
 #define TAKEN 0
@@ -17,6 +21,9 @@ typedef struct s_args
 	int		num_done_eating;
 	bool	stop_simulation;
 	pthread_mutex_t	*forks;
+	pthread_mutex_t	stop_mutex;
+	pthread_mutex_t	num_done_mutex;
+	
 }		t_args;
 
 typedef struct s_philo
@@ -30,15 +37,6 @@ typedef struct s_philo
 	bool	dead;
 	t_args	*specs;
 }		t_philo;
-
-
-
-// let every fork be a mutex itself, not an int protected by a mutex
-typedef struct s_fork
-{
-	bool	fork_status;
-	// mutex;
-}	t_fork;
 
 int		check_input(int argc, char **input);
 int		ft_strlen(const char *s);
